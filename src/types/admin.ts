@@ -27,6 +27,14 @@ export interface AdminQueryDto {
   pageSize?: number;
 }
 
+export interface AdminPagedResponseDto<T> {
+  pageNumber: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+  items: T[] | null;
+}
+
 export interface AdminModeratedMessageReviewDto {
   rejectionReason?: string;
 }
@@ -60,8 +68,9 @@ export interface AdminShopOwnerListItemDto {
   fullName: string;
   email: string;
   city: string;
-  isVerified: boolean;
-  verificationStatus: string;
+  businessVerificationStatus?: string | number | null;
+  isVerified?: boolean;
+  verificationStatus?: string | null;
   createdAt: string;
 }
 
