@@ -6,12 +6,11 @@ export interface ShopOwnerProfileResponseDto {
   phoneNumber: string;
   shopName: string;
   businessType: string;
-  registrationNumber: string;
-  address: string;
+  premisesLicenceNumber: string | null;
+  shopAddress: string;
   city: string;
   postcode: string;
-  isVerified: boolean;
-  verificationStatus: string;
+  businessVerificationStatus: number;
 }
 
 export interface CreateShopOwnerProfileDto {
@@ -20,8 +19,8 @@ export interface CreateShopOwnerProfileDto {
   phoneNumber: string;
   shopName: string;
   businessType: string;
-  registrationNumber: string;
-  address: string;
+  premisesLicenceNumber: string | null;
+  shopAddress: string;
   city: string;
   postcode: string;
 }
@@ -31,7 +30,8 @@ export interface UpdateShopOwnerProfileDto {
   phoneNumber: string;
   shopName: string;
   businessType: string;
-  address: string;
+  premisesLicenceNumber?: string | null;
+  shopAddress: string;
   city: string;
   postcode: string;
 }

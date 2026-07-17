@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { searchJobs } from '../../api/jobs.api';
+import { getMyApplications } from '../../api/jobApplications.api';
 import { JobPostingSummaryDto } from '../../types/jobs';
 import JobCard from '../../components/jobs/JobCard';
 import EmptyState from '../../components/ui/EmptyState';
@@ -26,6 +27,7 @@ export default function JobSearchScreen() {
   const [keyword, setKeyword] = useState('');
   const [city, setCity] = useState('');
   const [jobs, setJobs] = useState<JobPostingSummaryDto[]>([]);
+  const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [page, setPage] = useState(1);
@@ -47,6 +49,20 @@ export default function JobSearchScreen() {
     finally { setLoading(false); setSearched(true); }
   }, [keyword, city, page, jobs]);
 
+  const fetchAppliedJobs = async () => {
+    try {
+      const res = await getMyApplications();
+      if (res.data.succeeded && res.data.data) {
+        const ids = new Set(
+          res.data.data
+            .filter((app) => app.status !== 14) // Exclude withdrawn
+            .map((app) => app.jobPostingId)
+        );
+        setAppliedJobIds(ids);
+      }
+    } catch (_) {}
+  };
+
   const openDetail = (job: JobPostingSummaryDto) => {
     JOB_DETAIL_STORE.job = job;
     navigation.navigate('JobDetail' as any, { jobId: job.id });
@@ -55,6 +71,14 @@ export default function JobSearchScreen() {
   useEffect(() => {
     doSearch(true);
   }, []);
+
+  useEffect(() => {
+    fetchAppliedJobs();
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchAppliedJobs();
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   return (
     <View style={styles.container}>
@@ -100,7 +124,7 @@ export default function JobSearchScreen() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
           renderItem={({ item }) => (
-            <JobCard job={item} onPress={() => openDetail(item)} />
+            <JobCard job={item} applied={appliedJobIds.has(item.id)} onPress={() => openDetail(item)} />
           )}
           ListEmptyComponent={
             searched ? (

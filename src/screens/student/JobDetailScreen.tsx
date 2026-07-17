@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, StatusBar,
-  Modal, TextInput, Alert,
+  Modal, TextInput, Alert, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { JobPostingSummaryDto } from '../../types/jobs';
-import { applyToJob } from '../../api/jobApplications.api';
+import { applyToJob, getMyApplications } from '../../api/jobApplications.api';
 import AppButton from '../../components/ui/AppButton';
 import { format } from 'date-fns';
 
@@ -18,6 +18,7 @@ export default function JobDetailScreen({ navigation }: any) {
   const [modalVisible, setModalVisible] = useState(false);
   const [coverLetter, setCoverLetter] = useState('');
   const [applying, setApplying] = useState(false);
+  const [hasApplied, setHasApplied] = useState(false);
 
   if (!job) {
     return (
@@ -27,14 +28,36 @@ export default function JobDetailScreen({ navigation }: any) {
     );
   }
 
+  useEffect(() => {
+    const checkAppliedStatus = async () => {
+      try {
+        const res = await getMyApplications();
+        if (res.data.succeeded && res.data.data) {
+          const applied = res.data.data.some(
+            (app) => app.jobPostingId === job.id && app.status !== 14
+          );
+          setHasApplied(applied);
+        }
+      } catch (_) {}
+    };
+    checkAppliedStatus();
+  }, [job]);
+
   const apply = async () => {
     try {
       setApplying(true);
       const res = await applyToJob(job.id, { coverLetter });
       if (res.data.succeeded) {
-        Alert.alert('Applied!', 'Your application has been submitted for admin review.', [
-          { text: 'OK', onPress: () => { setModalVisible(false); navigation.goBack(); } },
-        ]);
+        const msg = 'Your application has been submitted for admin review.';
+        if (Platform.OS === 'web') {
+          Alert.alert('Applied!', msg);
+          setModalVisible(false);
+          navigation.goBack();
+        } else {
+          Alert.alert('Applied!', msg, [
+            { text: 'OK', onPress: () => { setModalVisible(false); navigation.goBack(); } },
+          ]);
+        }
       } else {
         Alert.alert('Error', res.data.message ?? 'Application failed');
       }
@@ -68,7 +91,7 @@ export default function JobDetailScreen({ navigation }: any) {
           </View>
           <View style={styles.metaChip}>
             <Ionicons name="cash-outline" size={14} color="#0d9488" />
-            <Text style={styles.metaText}>£{job.hourlyRate}/hr</Text>
+            <Text style={styles.metaText}>£{job.salaryAmount}/hr</Text>
           </View>
           <View style={styles.metaChip}>
             <Ionicons name="time-outline" size={14} color="#0d9488" />
@@ -88,7 +111,7 @@ export default function JobDetailScreen({ navigation }: any) {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Description</Text>
-          <Text style={styles.sectionText}>{job.jobDescription}</Text>
+          <Text style={styles.sectionText}>{job.description}</Text>
         </View>
 
         <Text style={styles.postedDate}>
@@ -96,8 +119,9 @@ export default function JobDetailScreen({ navigation }: any) {
         </Text>
 
         <AppButton
-          title="Apply for this Job"
-          variant="secondary"
+          title={hasApplied ? 'Applied' : 'Apply for this Job'}
+          variant={hasApplied ? 'outline' : 'secondary'}
+          disabled={hasApplied}
           onPress={() => setModalVisible(true)}
           style={{ marginTop: 24 }}
         />

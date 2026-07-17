@@ -29,7 +29,16 @@ export default function ShopOwnerProfileScreen() {
       if (pRes.data.data) {
         const p = pRes.data.data;
         setProfile(p);
-        setForm({ fullName: p.fullName, phoneNumber: p.phoneNumber, shopName: p.shopName, businessType: p.businessType, address: p.address, city: p.city, postcode: p.postcode });
+        setForm({
+          fullName: p.fullName,
+          phoneNumber: p.phoneNumber,
+          shopName: p.shopName,
+          businessType: p.businessType,
+          premisesLicenceNumber: p.premisesLicenceNumber,
+          shopAddress: p.shopAddress,
+          city: p.city,
+          postcode: p.postcode,
+        });
       }
       if (dRes.data.data) setDocs(dRes.data.data);
     } catch (_) {}
@@ -96,7 +105,16 @@ export default function ShopOwnerProfileScreen() {
           </View>
           {editing ? (
             <>
-              {[['Full Name', 'fullName'], ['Phone', 'phoneNumber'], ['Shop Name', 'shopName'], ['Business Type', 'businessType'], ['Address', 'address'], ['City', 'city']].map(([label, key]) => (
+              {[
+                ['Full Name', 'fullName'],
+                ['Phone', 'phoneNumber'],
+                ['Shop Name', 'shopName'],
+                ['Business Type', 'businessType'],
+                ['Licence Number', 'premisesLicenceNumber'],
+                ['Address', 'shopAddress'],
+                ['City', 'city'],
+                ['Postcode', 'postcode'],
+              ].map(([label, key]) => (
                 <View key={key} style={styles.field}>
                   <Text style={styles.fieldLabel}>{label}</Text>
                   <TextInput style={styles.fieldInput} value={String((form as any)[key] ?? '')} onChangeText={(t) => setForm((f) => ({ ...f, [key]: t }))} />
@@ -106,7 +124,15 @@ export default function ShopOwnerProfileScreen() {
             </>
           ) : (
             <>
-              {[['Email', p?.email], ['Phone', p?.phoneNumber], ['Business Type', p?.businessType], ['Reg. Number', p?.registrationNumber], ['Address', p?.address], ['City', p?.city]].map(([label, val]) => (
+              {[
+                ['Email', p?.email],
+                ['Phone', p?.phoneNumber],
+                ['Business Type', p?.businessType],
+                ['Licence Number', p?.premisesLicenceNumber],
+                ['Address', p?.shopAddress],
+                ['City', p?.city],
+                ['Postcode', p?.postcode],
+              ].map(([label, val]) => (
                 <View key={label} style={styles.infoRow}>
                   <Text style={styles.infoLabel}>{label}</Text>
                   <Text style={styles.infoValue}>{val ?? '—'}</Text>
@@ -114,8 +140,14 @@ export default function ShopOwnerProfileScreen() {
               ))}
               <View style={[styles.infoRow, { marginTop: 8 }]}>
                 <Text style={styles.infoLabel}>Verification</Text>
-                <Text style={[styles.infoValue, { color: p?.isVerified ? '#16a34a' : '#d97706' }]}>
-                  {p?.isVerified ? '✓ Verified' : `⏳ ${p?.verificationStatus ?? 'Pending'}`}
+                <Text style={[styles.infoValue, { color: p?.businessVerificationStatus === 2 ? '#16a34a' : '#d97706' }]}>
+                  {p?.businessVerificationStatus === 2
+                    ? '✓ Verified'
+                    : `⏳ ${
+                        p?.businessVerificationStatus === 1
+                          ? 'Under Review'
+                          : 'Pending'
+                      }`}
                 </Text>
               </View>
             </>

@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import {
   getMyApplications,
   withdrawApplication,
@@ -36,6 +37,7 @@ export default function MyApplicationsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const navigation = useNavigation<any>();
 
   const fetchApplications = async (silent = false) => {
     if (!silent) setLoading(true);
@@ -50,9 +52,15 @@ export default function MyApplicationsScreen() {
 
   useEffect(() => {
     fetchApplications();
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchApplications(true);
+    });
     pollRef.current = setInterval(() => fetchApplications(true), POLL_INTERVAL);
-    return () => { if (pollRef.current) clearInterval(pollRef.current); };
-  }, []);
+    return () => {
+      unsubscribe();
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, [navigation]);
 
   const handleAction = async (
     id: string,

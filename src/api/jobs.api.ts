@@ -22,3 +22,7 @@ export const updateJobPosting = (id: string, dto: UpdateJobPostingDto) =>
 
 export const deleteJobPosting = (id: string) =>
   apiClient.delete<ApiResponse<null>>(`/api/job-postings/${id}`);
+
+export const getJobPostingById = (id: string) =>
+  apiClient.get<ApiResponse<JobPostingResponseDto>>(`/api/job-postings/${id}`);
+

@@ -13,6 +13,7 @@ import { useAuth } from '../../context/AuthContext';
 import { getMyApplications } from '../../api/jobApplications.api';
 import { JobApplicationStatus } from '../../types/applications';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import StatusBadge from '../../components/ui/StatusBadge';
 
 const STATS_CONFIG = [
   { label: 'Active', statuses: [1,2,3,4,6,8,9,11], color: '#0d9488', bg: '#f0fdf9' },
@@ -34,7 +35,7 @@ export default function StudentDashboard() {
         setApplications(res.data.data);
       }
     } catch (_) {}
-    finally { setLoading(false); setRefreshing(false); }
+    finally { setLoading(false); refreshing && setRefreshing(false); }
   };
 
   useEffect(() => { fetchData(); }, []);
@@ -75,16 +76,17 @@ export default function StudentDashboard() {
 
       {/* Recent applications */}
       <Text style={styles.sectionTitle}>Recent Applications</Text>
-      {applications.slice(0, 5).map((app) => (
-        <View key={app.id} style={styles.appRow}>
-          <View style={styles.appDot} />
-          <View style={{ flex: 1 }}>
-            <Text style={styles.appJob}>{app.jobTitle}</Text>
-            <Text style={styles.appShop}>{app.shopName}</Text>
+      <View style={{ paddingHorizontal: 16 }}>
+        {applications.slice(0, 5).map((app) => (
+          <View key={app.id} style={styles.appCard}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.appJob}>{app.jobTitle}</Text>
+              <Text style={styles.appShop}>{app.shopName}</Text>
+            </View>
+            <StatusBadge status={app.status} />
           </View>
-          <View style={styles.statusDot(app.status)} />
-        </View>
-      ))}
+        ))}
+      </View>
 
       {applications.length === 0 && (
         <View style={styles.emptyBox}>
@@ -94,16 +96,6 @@ export default function StudentDashboard() {
     </ScrollView>
   );
 }
-
-const statusDot = (status: number) => ({
-  width: 10,
-  height: 10,
-  borderRadius: 5,
-  backgroundColor:
-    [12].includes(status) ? '#16a34a'
-    : [5,7,10,13,14].includes(status) ? '#dc2626'
-    : '#d97706',
-});
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8fafc' },
@@ -148,19 +140,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     marginBottom: 12,
   },
-  appRow: {
+  appCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
-    gap: 12,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 10,
+    shadowColor: '#0f2c59',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  appDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#0d9488' },
   appJob: { fontSize: 14, fontWeight: '600', color: '#1e293b' },
-  appShop: { fontSize: 12, color: '#64748b' },
-  statusDot,
+  appShop: { fontSize: 12, color: '#64748b', marginTop: 2 },
   emptyBox: {
     margin: 24,
     backgroundColor: '#f0fdf9',
@@ -169,4 +163,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyText: { color: '#0d9488', fontWeight: '600', textAlign: 'center' },
-} as any);
+});

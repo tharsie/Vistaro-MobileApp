@@ -1,10 +1,10 @@
 export interface JobPostingSummaryDto {
   id: string;
   jobTitle: string;
-  jobDescription: string;
+  description: string;
   jobCategory: string;
-  employmentType: 1 | 2;
-  hourlyRate: number;
+  employmentType: number;
+  salaryAmount: number;
   hoursPerWeek: number;
   city: string;
   postcode: string;
@@ -18,7 +18,7 @@ export interface JobSearchRequestDto {
   category?: string;
   minRate?: number;
   maxRate?: number;
-  employmentType?: 1 | 2;
+  employmentType?: number;
   page?: number;
   pageSize?: number;
 }
@@ -32,15 +32,19 @@ export interface JobSearchResponseDto {
 
 export interface CreateJobPostingDto {
   jobTitle: string;
-  jobDescription: string;
+  description: string;
   jobCategory: string;
-  employmentType: 1 | 2;
-  hourlyRate: number;
+  employmentType: number;
+  contractType: number;
+  salaryType: number;
+  salaryAmount: number;
   hoursPerWeek: number;
-  address: string;
+  location: string;
   city: string;
   postcode: string;
-  startDate?: string;
+  startDate: string;
+  expiryDate: string;
+  status: number;
 }
 
 export interface UpdateJobPostingDto extends CreateJobPostingDto {}
@@ -48,15 +52,21 @@ export interface UpdateJobPostingDto extends CreateJobPostingDto {}
 export interface JobPostingResponseDto {
   id: string;
   jobTitle: string;
-  jobDescription: string;
+  description: string;
   jobCategory: string;
-  employmentType: 1 | 2;
-  hourlyRate: number;
+  employmentType: number;
+  contractType: number;
+  salaryType: number;
+  salaryAmount: number;
   hoursPerWeek: number;
-  address: string;
+  location: string;
   city: string;
   postcode: string;
-  startDate: string | null;
+  startDate: string;
+  expiryDate: string;
+  status: number;
   createdAt: string;
   isPublished: boolean;
 }
+
+

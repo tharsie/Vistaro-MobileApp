@@ -12,9 +12,6 @@ import AppButton from '../../components/ui/AppButton';
 import EmptyState from '../../components/ui/EmptyState';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import { format } from 'date-fns';
-
-export const EDIT_JOB_STORE: { job: JobPostingResponseDto | null } = { job: null };
-
 export default function ManageJobsScreen() {
   const [jobs, setJobs] = useState<JobPostingResponseDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,7 +26,12 @@ export default function ManageJobsScreen() {
     finally { setLoading(false); setRefreshing(false); }
   };
 
-  useEffect(() => { fetch(); }, []);
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetch();
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   const handleDelete = (id: string) => {
     Alert.alert('Delete Job', 'Are you sure? This cannot be undone.', [
@@ -45,8 +47,7 @@ export default function ManageJobsScreen() {
   };
 
   const handleEdit = (job: JobPostingResponseDto) => {
-    EDIT_JOB_STORE.job = job;
-    navigation.navigate('CreateJob', { editMode: true });
+    navigation.navigate('CreateJob', { editMode: true, jobId: job.id });
   };
 
   if (loading) return <LoadingSpinner />;
@@ -59,7 +60,7 @@ export default function ManageJobsScreen() {
           <Text style={styles.title}>My Job Posts</Text>
           <Text style={styles.sub}>{jobs.length} posting{jobs.length !== 1 ? 's' : ''}</Text>
         </View>
-        <TouchableOpacity style={styles.addBtn} onPress={() => { EDIT_JOB_STORE.job = null; navigation.navigate('CreateJob', { editMode: false }); }}>
+        <TouchableOpacity style={styles.addBtn} onPress={() => { navigation.navigate('CreateJob', { editMode: false }); }}>
           <Ionicons name="add" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -76,7 +77,7 @@ export default function ManageJobsScreen() {
                 <Text style={styles.jobTitle}>{item.jobTitle}</Text>
                 <Text style={styles.cat}>{item.jobCategory} · {item.employmentType === 1 ? 'Part-time' : 'Full-time'}</Text>
               </View>
-              <Text style={styles.rate}>£{item.hourlyRate}/hr</Text>
+              <Text style={styles.rate}>£{item.salaryAmount}/hr</Text>
             </View>
             <View style={styles.metaRow}>
               <Ionicons name="location-outline" size={13} color="#64748b" />

@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
   StatusBar,
   KeyboardAvoidingView,
   Platform,
@@ -14,6 +13,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
 import { AuthStackParamList } from '../../navigation/AuthStack';
 import { login } from '../../api/auth.api';
 import { useAuth } from '../../context/AuthContext';
@@ -63,107 +63,154 @@ export default function LoginScreen({ navigation }: Props) {
     >
       <StatusBar barStyle="light-content" backgroundColor="#0f2c59" />
       <View style={styles.header}>
-        <Text style={styles.logo}>V</Text>
+        <View style={styles.logoWrapper}>
+          <Text style={styles.logo}>V</Text>
+        </View>
         <Text style={styles.brand}>Vistaro</Text>
-        <Text style={styles.tagline}>Welcome back</Text>
+        <Text style={styles.tagline}>Local jobs, connected.</Text>
       </View>
 
-      <ScrollView style={styles.form} contentContainerStyle={styles.formContent} keyboardShouldPersistTaps="handled">
-        {apiError && (
-          <View style={styles.errorBanner}>
-            <Text style={styles.errorBannerText}>{apiError}</Text>
-          </View>
-        )}
+      <View style={styles.card}>
+        <ScrollView contentContainerStyle={styles.formContent} keyboardShouldPersistTaps="handled">
+          <Text style={styles.welcomeText}>Welcome Back</Text>
+          <Text style={styles.subWelcomeText}>Sign in to continue to your account</Text>
 
-        <Controller
-          control={control}
-          name="email"
-          render={({ field: { onChange, value, onBlur } }) => (
-            <AppInput
-              label="Email Address"
-              placeholder="you@example.com"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              onChangeText={onChange}
-              onBlur={onBlur}
-              value={value}
-              error={errors.email?.message}
-            />
+          {apiError && (
+            <View style={styles.errorBanner}>
+              <Ionicons name="alert-circle-outline" size={18} color="#dc2626" />
+              <Text style={styles.errorBannerText}>{apiError}</Text>
+            </View>
           )}
-        />
 
-        <Controller
-          control={control}
-          name="password"
-          render={({ field: { onChange, value, onBlur } }) => (
-            <AppInput
-              label="Password"
-              placeholder="••••••••"
-              secureTextEntry
-              onChangeText={onChange}
-              onBlur={onBlur}
-              value={value}
-              error={errors.password?.message}
-            />
-          )}
-        />
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { onChange, value, onBlur } }) => (
+              <AppInput
+                label="Email Address"
+                placeholder="you@example.com"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                onChangeText={onChange}
+                onBlur={onBlur}
+                value={value}
+                error={errors.email?.message}
+              />
+            )}
+          />
 
-        <AppButton
-          title="Sign In"
-          onPress={handleSubmit(onSubmit)}
-          loading={submitting}
-          style={styles.button}
-        />
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { onChange, value, onBlur } }) => (
+              <AppInput
+                label="Password"
+                placeholder="••••••••"
+                secureTextEntry
+                onChangeText={onChange}
+                onBlur={onBlur}
+                value={value}
+                error={errors.password?.message}
+              />
+            )}
+          />
 
-        <TouchableOpacity
-          style={styles.register}
-          onPress={() => navigation.navigate('Register' as any)}
-        >
-          <Text style={styles.registerText}>
-            Don't have an account? <Text style={styles.registerLink}>Create one</Text>
-          </Text>
-        </TouchableOpacity>
-      </ScrollView>
+          <AppButton
+            title="Sign In"
+            onPress={handleSubmit(onSubmit)}
+            loading={submitting}
+            style={styles.button}
+          />
+
+          <TouchableOpacity
+            style={styles.register}
+            onPress={() => navigation.navigate('Register' as any)}
+          >
+            <Text style={styles.registerText}>
+              Don't have an account? <Text style={styles.registerLink}>Create one</Text>
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: { flex: 1, backgroundColor: '#f8fafc' },
+  wrapper: { flex: 1, backgroundColor: '#0f2c59' },
   header: {
-    backgroundColor: '#0f2c59',
     paddingTop: 60,
     paddingBottom: 40,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  logo: {
-    fontSize: 32,
-    fontWeight: '900',
-    color: '#0d9488',
-    width: 56,
-    height: 56,
-    lineHeight: 56,
-    textAlign: 'center',
-    backgroundColor: 'rgba(13,148,136,0.15)',
-    borderRadius: 16,
+  logoWrapper: {
+    width: 72,
+    height: 72,
+    borderRadius: 22,
+    backgroundColor: '#0d9488',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 12,
-    overflow: 'hidden',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#0d9488',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.4,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 8,
+      },
+      default: {
+        boxShadow: '0px 8px 20px rgba(13, 148, 136, 0.4)',
+      },
+    }),
   },
-  brand: { fontSize: 28, fontWeight: '800', color: '#ffffff' },
-  tagline: { fontSize: 14, color: '#94c3dc', marginTop: 4 },
-  form: { flex: 1 },
-  formContent: { padding: 24 },
+  logo: { fontSize: 36, fontWeight: '900', color: '#fff' },
+  brand: { fontSize: 30, fontWeight: '800', color: '#ffffff', letterSpacing: 1 },
+  tagline: { fontSize: 13, color: '#94c3dc', marginTop: 4, opacity: 0.8 },
+  card: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+    borderTopLeftRadius: 36,
+    borderTopRightRadius: 36,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -6 },
+        shadowOpacity: 0.08,
+        shadowRadius: 16,
+      },
+      android: {
+        elevation: 24,
+      },
+      default: {
+        boxShadow: '0px -6px 20px rgba(0, 0, 0, 0.08)',
+      },
+    }),
+  },
+  formContent: { paddingHorizontal: 28, paddingTop: 32, paddingBottom: 40 },
+  welcomeText: { fontSize: 24, fontWeight: '800', color: '#0f2c59', marginBottom: 4 },
+  subWelcomeText: { fontSize: 13, color: '#64748b', marginBottom: 24 },
   errorBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
     backgroundColor: '#fef2f2',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#fca5a5',
-    borderRadius: 8,
+    borderRadius: 12,
     padding: 12,
-    marginBottom: 16,
+    marginBottom: 20,
   },
-  errorBannerText: { color: '#dc2626', fontSize: 13 },
-  button: { marginTop: 8 },
-  register: { marginTop: 24, alignItems: 'center' },
+  errorBannerText: { color: '#dc2626', fontSize: 13, flex: 1, fontWeight: '500' },
+  button: {
+    marginTop: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  register: { marginTop: 28, alignItems: 'center' },
   registerText: { fontSize: 14, color: '#64748b' },
   registerLink: { color: '#0d9488', fontWeight: '700' },
 });

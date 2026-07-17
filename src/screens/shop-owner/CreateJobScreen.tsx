@@ -1,56 +1,105 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, StatusBar,
   KeyboardAvoidingView, Platform, Alert, TouchableOpacity,
 } from 'react-native';
-import { createJobPosting, updateJobPosting } from '../../api/jobs.api';
+import { createJobPosting, updateJobPosting, getJobPostingById } from '../../api/jobs.api';
 import { CreateJobPostingDto } from '../../types/jobs';
 import AppInput from '../../components/ui/AppInput';
 import AppButton from '../../components/ui/AppButton';
-import { EDIT_JOB_STORE } from './ManageJobsScreen';
-
-const CATEGORIES = ['Retail', 'Hospitality', 'Admin', 'Care', 'Logistics', 'Tech', 'Other'];
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import { format, addDays } from 'date-fns';
 
 export default function CreateJobScreen({ navigation, route }: any) {
   const editMode: boolean = route?.params?.editMode ?? false;
-  const existing = EDIT_JOB_STORE.job;
+  const jobId: string | undefined = route?.params?.jobId;
 
+  const [loading, setLoading] = useState(editMode);
   const [form, setForm] = useState<CreateJobPostingDto>({
-    jobTitle: existing?.jobTitle ?? '',
-    jobDescription: existing?.jobDescription ?? '',
-    jobCategory: existing?.jobCategory ?? '',
-    employmentType: existing?.employmentType ?? 1,
-    hourlyRate: existing?.hourlyRate ?? 0,
-    hoursPerWeek: existing?.hoursPerWeek ?? 0,
-    address: existing?.address ?? '',
-    city: existing?.city ?? '',
-    postcode: existing?.postcode ?? '',
+    jobTitle: '',
+    description: '',
+    jobCategory: '',
+    employmentType: 1,
+    contractType: 1,
+    salaryType: 1,
+    salaryAmount: 0,
+    hoursPerWeek: 0,
+    location: '',
+    city: '',
+    postcode: '',
+    startDate: format(new Date(), 'yyyy-MM-dd'),
+    expiryDate: format(addDays(new Date(), 30), 'yyyy-MM-dd'),
+    status: 2,
   });
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (editMode && jobId) {
+      const fetchJobDetails = async () => {
+        try {
+          const res = await getJobPostingById(jobId);
+          if (res.data.succeeded && res.data.data) {
+            const job = res.data.data;
+            setForm({
+              jobTitle: job.jobTitle,
+              description: job.description,
+              jobCategory: job.jobCategory,
+              employmentType: job.employmentType,
+              contractType: job.contractType,
+              salaryType: job.salaryType,
+              salaryAmount: job.salaryAmount,
+              hoursPerWeek: job.hoursPerWeek,
+              location: job.location,
+              city: job.city,
+              postcode: job.postcode,
+              startDate: job.startDate,
+              expiryDate: job.expiryDate,
+              status: job.status,
+            });
+          } else {
+            Alert.alert('Error', 'Failed to retrieve job details.');
+          }
+        } catch {
+          Alert.alert('Error', 'Failed to fetch job details from server.');
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchJobDetails();
+    }
+  }, [editMode, jobId]);
 
   const set = <K extends keyof CreateJobPostingDto>(key: K, val: CreateJobPostingDto[K]) =>
     setForm((f) => ({ ...f, [key]: val }));
 
   const save = async () => {
-    if (!form.jobTitle || !form.jobDescription || !form.city) {
+    if (!form.jobTitle || !form.description || !form.city) {
       Alert.alert('Validation', 'Please fill in title, description and city.');
       return;
     }
     try {
       setSaving(true);
-      const res = editMode && existing
-        ? await updateJobPosting(existing.id, form)
+      const res = editMode && jobId
+        ? await updateJobPosting(jobId, form)
         : await createJobPosting(form);
       if (res.data.succeeded) {
-        Alert.alert('Success', editMode ? 'Job updated!' : 'Job posted successfully!', [
-          { text: 'OK', onPress: () => navigation.goBack() },
-        ]);
+        const successMsg = editMode ? 'Job updated!' : 'Job posted successfully!';
+        if (Platform.OS === 'web') {
+          Alert.alert('Success', successMsg);
+          navigation.goBack();
+        } else {
+          Alert.alert('Success', successMsg, [
+            { text: 'OK', onPress: () => navigation.goBack() },
+          ]);
+        }
       } else {
         Alert.alert('Error', res.data.message ?? 'Failed to save job');
       }
     } catch { Alert.alert('Error', 'Network error'); }
     finally { setSaving(false); }
   };
+
+  if (loading) return <LoadingSpinner />;
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -64,20 +113,14 @@ export default function CreateJobScreen({ navigation, route }: any) {
 
       <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
         <AppInput label="Job Title" value={form.jobTitle} onChangeText={(t) => set('jobTitle', t)} placeholder="e.g. Sales Assistant" />
-        <AppInput label="Job Description" value={form.jobDescription} onChangeText={(t) => set('jobDescription', t)} placeholder="Describe responsibilities..." multiline numberOfLines={4} style={{ minHeight: 100 }} />
+        <AppInput label="Job Description" value={form.description} onChangeText={(t) => set('description', t)} placeholder="Describe responsibilities..." multiline numberOfLines={4} style={{ minHeight: 100 }} />
 
-        <Text style={styles.fieldLabel}>Category</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chips}>
-          {CATEGORIES.map((c) => (
-            <TouchableOpacity
-              key={c}
-              style={[styles.chip, form.jobCategory === c && styles.chipActive]}
-              onPress={() => set('jobCategory', c)}
-            >
-              <Text style={[styles.chipText, form.jobCategory === c && styles.chipTextActive]}>{c}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+        <AppInput
+          label="Job Category (e.g. Retail, Cafe)"
+          value={form.jobCategory}
+          onChangeText={(t) => set('jobCategory', t)}
+          placeholder="e.g. Retail, Cafe"
+        />
 
         <Text style={styles.fieldLabel}>Employment Type</Text>
         <View style={styles.toggle}>
@@ -97,8 +140,8 @@ export default function CreateJobScreen({ navigation, route }: any) {
         <View style={styles.row}>
           <AppInput
             label="Hourly Rate (£)"
-            value={String(form.hourlyRate)}
-            onChangeText={(t) => set('hourlyRate', parseFloat(t) || 0)}
+            value={String(form.salaryAmount)}
+            onChangeText={(t) => set('salaryAmount', parseFloat(t) || 0)}
             keyboardType="decimal-pad"
             containerStyle={{ flex: 1 }}
           />
@@ -112,11 +155,29 @@ export default function CreateJobScreen({ navigation, route }: any) {
           />
         </View>
 
-        <AppInput label="Address" value={form.address} onChangeText={(t) => set('address', t)} placeholder="Street address" />
+        <AppInput label="Address" value={form.location} onChangeText={(t) => set('location', t)} placeholder="Street address" />
         <View style={styles.row}>
           <AppInput label="City" value={form.city} onChangeText={(t) => set('city', t)} containerStyle={{ flex: 1 }} />
           <View style={{ width: 12 }} />
           <AppInput label="Postcode" value={form.postcode} onChangeText={(t) => set('postcode', t)} containerStyle={{ flex: 1 }} />
+        </View>
+
+        <View style={styles.row}>
+          <AppInput
+            label="Start Date (YYYY-MM-DD)"
+            value={form.startDate}
+            onChangeText={(t) => set('startDate', t)}
+            placeholder="e.g. 2026-07-16"
+            containerStyle={{ flex: 1 }}
+          />
+          <View style={{ width: 12 }} />
+          <AppInput
+            label="Expiry Date (YYYY-MM-DD)"
+            value={form.expiryDate}
+            onChangeText={(t) => set('expiryDate', t)}
+            placeholder="e.g. 2026-08-15"
+            containerStyle={{ flex: 1 }}
+          />
         </View>
 
         <AppButton title={editMode ? 'Update Job' : 'Post Job'} onPress={save} loading={saving} style={{ marginTop: 8 }} />

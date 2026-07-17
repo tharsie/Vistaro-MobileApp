@@ -8,9 +8,10 @@ import { format } from 'date-fns';
 interface JobCardProps {
   job: JobPostingSummaryDto;
   onPress: () => void;
+  applied?: boolean;
 }
 
-export default function JobCard({ job, onPress }: JobCardProps) {
+export default function JobCard({ job, onPress, applied }: JobCardProps) {
   const employmentLabel = job.employmentType === 1 ? 'Part-time' : 'Full-time';
 
   return (
@@ -24,12 +25,12 @@ export default function JobCard({ job, onPress }: JobCardProps) {
             <Text style={styles.shop}>{job.shopName}</Text>
           </View>
           <View style={styles.rateTag}>
-            <Text style={styles.rate}>£{job.hourlyRate}/hr</Text>
+            <Text style={styles.rate}>£{job.salaryAmount}/hr</Text>
           </View>
         </View>
 
         <Text style={styles.description} numberOfLines={2}>
-          {job.jobDescription}
+          {job.description}
         </Text>
 
         <View style={styles.meta}>
@@ -44,6 +45,11 @@ export default function JobCard({ job, onPress }: JobCardProps) {
           <View style={[styles.badge, job.employmentType === 1 ? styles.partTime : styles.fullTime]}>
             <Text style={styles.badgeText}>{employmentLabel}</Text>
           </View>
+          {applied && (
+            <View style={[styles.badge, styles.appliedBadge]}>
+              <Text style={styles.appliedText}>✓ Applied</Text>
+            </View>
+          )}
         </View>
 
         <Text style={styles.date}>
@@ -75,5 +81,7 @@ const styles = StyleSheet.create({
   partTime: { backgroundColor: '#fef9c3' },
   fullTime: { backgroundColor: '#dbeafe' },
   badgeText: { fontSize: 11, fontWeight: '600', color: '#374151' },
+  appliedBadge: { backgroundColor: '#dcfce7' },
+  appliedText: { fontSize: 11, fontWeight: '700', color: '#16a34a' },
   date: { fontSize: 11, color: '#94a3b8' },
 });
