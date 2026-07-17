@@ -13,6 +13,7 @@ import { AuthStackParamList } from '../../navigation/AuthStack';
 import { register as registerApi } from '../../api/auth.api';
 import { useAuth } from '../../context/AuthContext';
 import AppButton from '../../components/ui/AppButton';
+import { getErrorMessage } from '../../utils/apiError';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'RoleSelect'>;
 
@@ -59,7 +60,7 @@ export default function RoleSelectScreen({ route, navigation }: Props) {
         setError(res.data.message ?? 'Registration failed.');
       }
     } catch (e: any) {
-      setError(e.response?.data?.message ?? 'Network error. Please try again.');
+      setError(getErrorMessage(e, 'Network error. Please try again.'));
     } finally {
       setLoading(false);
     }

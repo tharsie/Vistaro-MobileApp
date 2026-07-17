@@ -19,6 +19,7 @@ import { login } from '../../api/auth.api';
 import { useAuth } from '../../context/AuthContext';
 import AppInput from '../../components/ui/AppInput';
 import AppButton from '../../components/ui/AppButton';
+import { getErrorMessage } from '../../utils/apiError';
 
 const schema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -49,9 +50,7 @@ export default function LoginScreen({ navigation }: Props) {
         setApiError(res.data.message ?? 'Login failed. Please try again.');
       }
     } catch (e: any) {
-      setApiError(
-        e.response?.data?.message ?? 'Unable to connect. Check your internet connection.',
-      );
+      setApiError(getErrorMessage(e, 'Unable to connect. Check your internet connection.'));
     } finally {
       setSubmitting(false);
     }
