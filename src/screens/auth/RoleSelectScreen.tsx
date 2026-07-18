@@ -41,7 +41,7 @@ const ROLES: Array<{
 ];
 
 export default function RoleSelectScreen({ route, navigation }: Props) {
-  const { fullName, email, password } = route.params;
+  const { fullName, email, phoneNumber, password } = route.params;
   const { login } = useAuth();
   const [selected, setSelected] = useState<'Student' | 'ShopOwner' | null>(null);
   const [loading, setLoading] = useState(false);
@@ -52,7 +52,7 @@ export default function RoleSelectScreen({ route, navigation }: Props) {
     try {
       setLoading(true);
       setError(null);
-      const res = await registerApi({ fullName, email, password, role: selected });
+      const res = await registerApi({ fullName, email, phoneNumber, password, role: selected });
       if (res.data.succeeded && res.data.data) {
         const { token, user } = res.data.data;
         await login(token, user);

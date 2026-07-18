@@ -8,8 +8,8 @@ import RoleSelectScreen from '../screens/auth/RoleSelectScreen';
 export type AuthStackParamList = {
   Splash: undefined;
   Login: undefined;
-  Register: { fullName: string; email: string; password: string };
-  RoleSelect: { fullName: string; email: string; password: string };
+  Register: undefined;
+  RoleSelect: { fullName: string; email: string; phoneNumber: string; password: string };
 };
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();

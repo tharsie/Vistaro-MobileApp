@@ -21,6 +21,7 @@ const schema = z
   .object({
     fullName: z.string().min(2, 'Full name is required'),
     email: z.string().email('Enter a valid email'),
+    phoneNumber: z.string().min(10, 'Enter a valid phone number (min 10 digits)'),
     password: z.string().min(8, 'Password must be at least 8 characters'),
     confirmPassword: z.string(),
   })
@@ -41,6 +42,7 @@ export default function RegisterScreen({ navigation }: Props) {
     navigation.navigate('RoleSelect', {
       fullName: data.fullName,
       email: data.email,
+      phoneNumber: data.phoneNumber,
       password: data.password,
     });
   };
@@ -87,6 +89,21 @@ export default function RegisterScreen({ navigation }: Props) {
               onBlur={onBlur}
               value={value}
               error={errors.email?.message}
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="phoneNumber"
+          render={({ field: { onChange, value, onBlur } }) => (
+            <AppInput
+              label="Phone Number"
+              placeholder="e.g. +94764291954"
+              keyboardType="phone-pad"
+              onChangeText={onChange}
+              onBlur={onBlur}
+              value={value}
+              error={errors.phoneNumber?.message}
             />
           )}
         />
