@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   TouchableOpacity,
   StatusBar,
@@ -70,9 +71,18 @@ export default function RoleSelectScreen({ route, navigation }: Props) {
     <View style={styles.wrapper}>
       <StatusBar barStyle="light-content" backgroundColor="#0f2c59" />
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backText}>← Back</Text>
-        </TouchableOpacity>
+        <View style={styles.headerTop}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Text style={styles.backText}>← Back</Text>
+          </TouchableOpacity>
+          <View style={styles.miniLogoWrapper}>
+            <Image
+              source={require('../../../assets/vistaro_logo.jpg')}
+              style={styles.miniLogo}
+              resizeMode="cover"
+            />
+          </View>
+        </View>
         <Text style={styles.title}>I am a…</Text>
         <Text style={styles.sub}>Select your account type to continue</Text>
       </View>
@@ -123,11 +133,30 @@ const styles = StyleSheet.create({
   wrapper: { flex: 1, backgroundColor: '#f8fafc' },
   header: {
     backgroundColor: '#0f2c59',
-    paddingTop: 56,
-    paddingBottom: 32,
+    paddingTop: 54,
+    paddingBottom: 28,
     paddingHorizontal: 24,
   },
-  backText: { color: '#94c3dc', marginBottom: 16, fontSize: 14 },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  backText: { color: '#94c3dc', fontSize: 14, fontWeight: '600' },
+  miniLogoWrapper: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#0a192f',
+    borderWidth: 1,
+    borderColor: 'rgba(13, 148, 136, 0.4)',
+  },
+  miniLogo: {
+    width: '100%',
+    height: '100%',
+  },
   title: { fontSize: 26, fontWeight: '800', color: '#ffffff' },
   sub: { fontSize: 13, color: '#94c3dc', marginTop: 4 },
   content: { padding: 24 },
