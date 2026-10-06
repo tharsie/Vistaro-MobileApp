@@ -65,9 +65,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
-    await deleteAuthItem(TOKEN_KEY);
-    await deleteAuthItem(USER_KEY);
-    dispatch({ type: 'LOGOUT' });
+    try {
+      dispatch({ type: 'LOGOUT' });
+    } catch (_) {}
+    try {
+      await Promise.allSettled([
+        deleteAuthItem(TOKEN_KEY),
+        deleteAuthItem(USER_KEY),
+      ]);
+    } catch (e) {
+      console.warn('Error clearing auth storage:', e);
+    }
   }, []);
 
   return (

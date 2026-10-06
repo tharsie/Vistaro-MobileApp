@@ -173,10 +173,31 @@ export default function StudentDashboard() {
   }, []);
 
   const handleLogout = () => {
-    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Sign Out', style: 'destructive', onPress: logout },
-    ]);
+    if (Platform.OS === 'web') {
+      const confirmed = typeof globalThis !== 'undefined' && (globalThis as any).confirm
+        ? (globalThis as any).confirm('Are you sure you want to sign out?')
+        : true;
+      if (confirmed) {
+        logout();
+      }
+      return;
+    }
+
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to sign out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Sign Out',
+          style: 'destructive',
+          onPress: () => {
+            logout();
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   const toggleFavorite = (jobId: string) => {

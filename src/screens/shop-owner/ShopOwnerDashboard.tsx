@@ -54,10 +54,31 @@ export default function ShopOwnerDashboard() {
   }, []);
 
   const handleLogout = () => {
-    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Sign Out', style: 'destructive', onPress: logout },
-    ]);
+    if (Platform.OS === 'web') {
+      const confirmed = typeof globalThis !== 'undefined' && (globalThis as any).confirm
+        ? (globalThis as any).confirm('Are you sure you want to sign out?')
+        : true;
+      if (confirmed) {
+        logout();
+      }
+      return;
+    }
+
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to sign out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Sign Out',
+          style: 'destructive',
+          onPress: () => {
+            logout();
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   const getOwnerInitials = () => {
@@ -132,6 +153,7 @@ export default function ShopOwnerDashboard() {
                 style={[styles.iconBtn, styles.logoutBtn]}
                 onPress={handleLogout}
                 activeOpacity={0.75}
+                hitSlop={{ top: 10, bottom: 10, left: 8, right: 10 }}
               >
                 <Ionicons name="log-out-outline" size={19} color="#ffffff" />
               </TouchableOpacity>
