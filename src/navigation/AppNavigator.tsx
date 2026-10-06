@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { ActivityIndicator, View } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import AuthStack from './AuthStack';
 import StudentTabsNavigator from './StudentTabs';
@@ -10,6 +9,7 @@ import AdminTabsNavigator from './AdminTabs';
 import ChatScreen from '../screens/messaging/ChatScreen';
 import JobDetailScreen from '../screens/student/JobDetailScreen';
 import CreateJobScreen from '../screens/shop-owner/CreateJobScreen';
+import SplashScreen from '../screens/auth/SplashScreen';
 
 // Root stack wraps tab navigators to allow pushing full-screen modals
 const RootStack = createNativeStackNavigator();
@@ -44,13 +44,11 @@ function AdminRoot() {
 
 export default function AppNavigator() {
   const { state } = useAuth();
+  const [launching, setLaunching] = useState(true);
 
-  if (state.isLoading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0f2c59' }}>
-        <ActivityIndicator size="large" color="#0d9488" />
-      </View>
-    );
+  // Show the launch screen on app boot for all users
+  if (launching || state.isLoading) {
+    return <SplashScreen onFinish={() => setLaunching(false)} />;
   }
 
   const renderNavigator = () => {

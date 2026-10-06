@@ -1,8 +1,7 @@
 import axios from 'axios';
 import { getAuthItem, deleteAuthItem } from '../utils/authStorage';
 
-const BASE_URL =
-  'https://vistaro-api-001-hec9a6apcne6hfhc.eastasia-01.azurewebsites.net';
+const BASE_URL = 'https://api.vistaro.co.uk';
 
 const apiClient = axios.create({
   baseURL: BASE_URL,

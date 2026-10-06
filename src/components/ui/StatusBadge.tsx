@@ -85,7 +85,7 @@ const STATUS_MAP: Record<
 export default function StatusBadge({ status }: StatusBadgeProps) {
   const config = STATUS_MAP[status] ?? { label: 'Unknown', color: '#6b7280', bg: '#f9fafb' };
   return (
-    <View style={[styles.badge, { backgroundColor: config.bg }]}>
+    <View style={[styles.badge, { backgroundColor: config.bg, borderColor: config.color + '26', borderWidth: 1 }]}>
       <Text style={[styles.text, { color: config.color }]}>{config.label}</Text>
     </View>
   );

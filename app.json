@@ -6,6 +6,11 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/launchscreenback.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#0a1e3f"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.tharsiegan.MobileApplication"
